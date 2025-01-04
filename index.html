@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Checker</title>
+</head>
+<body>
+
+<div class="container">
+    <h2>Password Strength Checker</h2>
+    <input type="password" id="password" placeholder="Enter your password">
+    <div class="strength-bar">
+        <div id="strength"></div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('strength');
+    const feedback = document.getElementById('feedback');
+
+    passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        const strength = calculateStrength(password);
+
+        // Update the strength bar
+        strengthBar.style.width = strength.percentage + '%';
+        strengthBar.className = '';
+        strengthBar.classList.add(strength.level);
+
+        // Update the feedback message
+        feedback.innerHTML = strength.message;
+    });
+
+    function calculateStrength(password) {
+        let score = 0;
+        let message = '';
+
+        const feedbackItems = [];
+        
+        // Check for length
+        if (password.length >= 12) {
+            score += 2;
+            feedbackItems.push('Good length.');
+        } else if (password.length >= 8) {
+            score += 1;
+            feedbackItems.push('Consider making your password longer.');
+        } else {
+            feedbackItems.push('Your password is too short. Aim for at least 12 characters.');
+        }
+
+        // Check for character variety
+        if (/[A-Z]/.test(password)) {
+            score += 1;
+            feedbackItems.push('Includes uppercase letters.');
+        } else {
+            feedbackItems.push('Add uppercase letters.');
+        }
+
+        if (/[a-z]/.test(password)) {
+            score += 1;
+            feedbackItems.push('Includes lowercase letters.');
+        } else {
+            feedbackItems.push('Add lowercase letters.');
+        }
+
+        if (/[0-9]/.test(password)) {
+            score += 1;
+            feedbackItems.push('Includes numbers.');
+        } else {
+            feedbackItems.push('Add numbers.');
+        }
+
+        if (/[^a-zA-Z0-9]/.test(password)) {
+            score += 1;
+            feedbackItems.push('Includes special characters.');
+        } else {
+            feedbackItems.push('Add special characters (e.g., !@#$%).');
+        }
+
+        // Avoid patterns
+        if (/^(password|123456|qwerty|abc123)$/i.test(password)) {
+            score = 0;
+            feedbackItems.push('Avoid common patterns like "password" or "123456".');
+        }
+        if (/([a-zA-Z0-9])\1{2,}/.test(password)) {
+            score -= 1;
+            feedbackItems.push('Avoid repeated characters.');
+        }
+        if (/1234|abcd|qwerty/i.test(password)) {
+            score -= 1;
+            feedbackItems.push('Avoid sequential patterns like "1234" or "abcd".');
+        }
+
+        // Determine strength level
+        let percentage = (score / 6) * 100;
+        let level;
+
+        if (score <= 2) {
+            level = 'weak';
+            message = '<strong>Weak:</strong> ' + feedbackItems.join(' ');
+        } else if (score <= 4) {
+            level = 'fair';
+            message = '<strong>Fair:</strong> ' + feedbackItems.join(' ');
+        } else {
+            level = 'strong';
+            message = '<strong>Strong:</strong> ' + feedbackItems.join(' ');
+        }
+
+        if (score < 0) {
+            level = 'weak';
+            message = '<strong>Weak:</strong> ' + feedbackItems.join(' ');
+        }
+
+        return { percentage: Math.max(percentage, 0), level, message };
+    }
+</script>
+
+</body>
+</html>
